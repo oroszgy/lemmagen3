@@ -205,6 +205,36 @@ namespace LemmaSharp
                 ltnRootNodeFront.Serialize(binWrt);
         }
 
+        public void SerializeModel(StreamWriter sb, int iLevel, bool first)
+        {
+            SerializeModel(this.RootNode, sb, iLevel, first);
+        }
+
+        private void SerializeModel(LemmaTreeNode ltn, StreamWriter sb, int iLevel, bool first)
+        {
+            sb.Write(new string('\t', first ? 1 : iLevel));
+            sb.Write("RULE: ");
+            sb.Write("i\"" + (ltn.bWholeWord ? "#" : "") + ltn.sCondition + "\" ");
+            sb.Write("t\"" + ltn.sCondition.Substring(ltn.sCondition.Length - ltn.lrBestRule.iFrom) + "\"->\"" +
+                     ltn.lrBestRule.sTo + "\";");
+            sb.WriteLine();
+            if (ltn.dictSubNodes != null)
+            {
+                sb.Write(new string('\t', iLevel));
+                sb.Write("{:");
+                bool firstInner = true;
+                foreach (LemmaTreeNode ltnChild in ltn.dictSubNodes.Values)
+                {
+                    SerializeModel(ltnChild, sb, iLevel + 1, firstInner);
+                    firstInner = false;
+                }
+                sb.Write(new string('\t', iLevel));
+                sb.Write(":}");
+                sb.WriteLine();
+                sb.WriteLine();
+            }
+        }
+
         public void Deserialize(BinaryReader binRead)
         {
             lsett = new LemmatizerSettings(binRead);

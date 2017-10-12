@@ -8,9 +8,9 @@ namespace LemmaSharp
         #region Private Variables
 
         private int iId;
-        private int iFrom;
+        internal int iFrom;
         private string sFrom;
-        private string sTo;
+        internal string sTo;
         private string sSignature;
         private LemmatizerSettings lsett;
 

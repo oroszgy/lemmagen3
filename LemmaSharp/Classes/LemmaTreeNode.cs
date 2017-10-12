@@ -14,18 +14,18 @@ namespace LemmaSharp
         private LemmatizerSettings lsett;
 
         //tree structure references
-        private Dictionary<char, LemmaTreeNode> dictSubNodes;
+        internal Dictionary<char, LemmaTreeNode> dictSubNodes;
 
         private LemmaTreeNode ltnParentNode;
 
         //essential node properties
         private int iSimilarity; //similarity among all words in this node
 
-        private string sCondition; //suffix that must match in order to lemmatize
-        private bool bWholeWord; //true if condition has to match to whole word
+        internal string sCondition; //suffix that must match in order to lemmatize
+        internal bool bWholeWord; //true if condition has to match to whole word
 
         //rules and weights;
-        private LemmaRule lrBestRule; //the best rule to be applied when lemmatizing
+        internal LemmaRule lrBestRule; //the best rule to be applied when lemmatizing
 
         private RuleWeighted[] aBestRules; //list of best rules
         private double dWeight;
