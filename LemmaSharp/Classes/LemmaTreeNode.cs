@@ -3,30 +3,36 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace LemmaSharp {
+namespace LemmaSharp
+{
     [Serializable()]
-    public class LemmaTreeNode : ILemmatizerModel {
+    public class LemmaTreeNode : ILemmatizerModel
+    {
         #region Private Variables
 
         //settings
-        private LemmatizerSettings lsett; 
+        private LemmatizerSettings lsett;
 
         //tree structure references
         private Dictionary<char, LemmaTreeNode> dictSubNodes;
+
         private LemmaTreeNode ltnParentNode;
 
         //essential node properties
         private int iSimilarity; //similarity among all words in this node
+
         private string sCondition; //suffix that must match in order to lemmatize
         private bool bWholeWord; //true if condition has to match to whole word
 
         //rules and weights;
         private LemmaRule lrBestRule; //the best rule to be applied when lemmatizing
+
         private RuleWeighted[] aBestRules; //list of best rules
         private double dWeight;
 
         //source of this node
         private int iStart;
+
         private int iEnd;
         private ExampleList elExamples;
 
@@ -34,13 +40,16 @@ namespace LemmaSharp {
 
         #region Constructor(s) & Destructor(s)
 
-        private LemmaTreeNode(LemmatizerSettings lsett) {
+        private LemmaTreeNode(LemmatizerSettings lsett)
+        {
             this.lsett = lsett;
         }
+
         public LemmaTreeNode(LemmatizerSettings lsett, ExampleList elExamples)
-            : this(lsett, elExamples, 0, elExamples.Count-1, null) {
+            : this(lsett, elExamples, 0, elExamples.Count - 1, null)
+        {
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -49,7 +58,9 @@ namespace LemmaSharp {
         /// <param name="iStart">Index of the first word of the current group</param>
         /// <param name="iEnd">Index of the last word of the current group</param>
         /// <param name="ltnParentNode"></param>
-        private LemmaTreeNode(LemmatizerSettings lsett, ExampleList elExamples, int iStart, int iEnd, LemmaTreeNode ltnParentNode) : this(lsett) {
+        private LemmaTreeNode(LemmatizerSettings lsett, ExampleList elExamples, int iStart, int iEnd,
+            LemmaTreeNode ltnParentNode) : this(lsett)
+        {
             this.ltnParentNode = ltnParentNode;
             this.dictSubNodes = null;
 
@@ -57,7 +68,8 @@ namespace LemmaSharp {
             this.iEnd = iEnd;
             this.elExamples = elExamples;
 
-            if (iStart >= elExamples.Count || iEnd >= elExamples.Count || iStart > iEnd) {
+            if (iStart >= elExamples.Count || iEnd >= elExamples.Count || iStart > iEnd)
+            {
                 lrBestRule = elExamples.Rules.DefaultRule;
                 aBestRules = new RuleWeighted[1];
                 aBestRules[0] = new RuleWeighted(lrBestRule, 0);
@@ -66,7 +78,8 @@ namespace LemmaSharp {
             }
 
 
-            int iConditionLength = Math.Min(ltnParentNode == null ? 0 : ltnParentNode.iSimilarity + 1, elExamples[iStart].Word.Length);
+            int iConditionLength = Math.Min(ltnParentNode == null ? 0 : ltnParentNode.iSimilarity + 1,
+                elExamples[iStart].Word.Length);
             this.sCondition = elExamples[iStart].Word.Substring(elExamples[iStart].Word.Length - iConditionLength);
             this.iSimilarity = elExamples[iStart].Similarity(elExamples[iEnd]);
             this.bWholeWord = ltnParentNode == null ? false : elExamples[iEnd].Word.Length == ltnParentNode.iSimilarity;
@@ -76,31 +89,34 @@ namespace LemmaSharp {
 
 
             //TODO check this heuristics, can be problematic when there are more applicable rules
-            if (dictSubNodes != null) {
+            if (dictSubNodes != null)
+            {
                 List<KeyValuePair<char, LemmaTreeNode>> lReplaceNodes = new List<KeyValuePair<char, LemmaTreeNode>>();
                 foreach (KeyValuePair<char, LemmaTreeNode> kvpChild in dictSubNodes)
-                    if (kvpChild.Value.dictSubNodes != null && kvpChild.Value.dictSubNodes.Count == 1) {
+                    if (kvpChild.Value.dictSubNodes != null && kvpChild.Value.dictSubNodes.Count == 1)
+                    {
                         IEnumerator<LemmaTreeNode> enumChildChild = kvpChild.Value.dictSubNodes.Values.GetEnumerator();
                         enumChildChild.MoveNext();
                         LemmaTreeNode ltrChildChild = enumChildChild.Current;
                         if (kvpChild.Value.lrBestRule == lrBestRule)
                             lReplaceNodes.Add(new KeyValuePair<char, LemmaTreeNode>(kvpChild.Key, ltrChildChild));
                     }
-                foreach (KeyValuePair<char, LemmaTreeNode> kvpChild in lReplaceNodes) {
+                foreach (KeyValuePair<char, LemmaTreeNode> kvpChild in lReplaceNodes)
+                {
                     dictSubNodes[kvpChild.Key] = kvpChild.Value;
                     kvpChild.Value.ltnParentNode = this;
                 }
-
             }
-
         }
 
         #endregion
 
         #region Public Properties
 
-        public int TreeSize {
-            get {
+        public int TreeSize
+        {
+            get
+            {
                 int iCount = 1;
                 if (dictSubNodes != null)
                     foreach (LemmaTreeNode ltnChild in dictSubNodes.Values)
@@ -108,17 +124,18 @@ namespace LemmaSharp {
                 return iCount;
             }
         }
-        public double Weight {
-            get {
-                return dWeight;
-            }
+
+        public double Weight
+        {
+            get { return dWeight; }
         }
 
         #endregion
 
         #region Essential Class Functions (building model)
 
-        private void FindBestRules() {
+        private void FindBestRules()
+        {
             /*
              *  LINQ SPEED TEST (Slower than current metodology)
              * 
@@ -150,15 +167,18 @@ namespace LemmaSharp {
             dWeight = 0;
 
             //calculate dWeight of whole node and calculates qualities for all rules
-            Dictionary<LemmaRule, double> dictApplicableRules = new Dictionary<LemmaRule,double>();
+            Dictionary<LemmaRule, double> dictApplicableRules = new Dictionary<LemmaRule, double>();
             //dictApplicableRules.Add(elExamples.Rules.DefaultRule, 0);
-            while (dictApplicableRules.Count == 0) {
-                for (int iExm = iStart; iExm <= iEnd; iExm++) {
+            while (dictApplicableRules.Count == 0)
+            {
+                for (int iExm = iStart; iExm <= iEnd; iExm++)
+                {
                     LemmaRule lr = elExamples[iExm].Rule;
                     double dExmWeight = elExamples[iExm].Weight;
                     dWeight += dExmWeight;
 
-                    if (lr.IsApplicableToGroup(sCondition.Length)) {
+                    if (lr.IsApplicableToGroup(sCondition.Length))
+                    {
                         if (dictApplicableRules.ContainsKey(lr))
                             dictApplicableRules[lr] += dExmWeight;
                         else
@@ -166,15 +186,17 @@ namespace LemmaSharp {
                     }
                 }
                 //if none found then increase condition length or add some default appliable rule
-                if (dictApplicableRules.Count == 0) {
+                if (dictApplicableRules.Count == 0)
+                {
                     if (this.sCondition.Length < iSimilarity)
-                        this.sCondition = elExamples[iStart].Word.Substring(elExamples[iStart].Word.Length - (sCondition.Length+1));
+                        this.sCondition = elExamples[iStart].Word
+                            .Substring(elExamples[iStart].Word.Length - (sCondition.Length + 1));
                     else
                         //TODO preveri hevristiko, mogoce je bolje ce se doda default rule namesto rulea od starsa
                         dictApplicableRules.Add(ltnParentNode.lrBestRule, 0);
                 }
             }
-            
+
             //TODO can optimize this step using sorted list (dont add if it's worse than the worst)
             List<RuleWeighted> lSortedRules = new List<RuleWeighted>();
             foreach (KeyValuePair<LemmaRule, double> kvp in dictApplicableRules)
@@ -186,36 +208,45 @@ namespace LemmaSharp {
             if (lsett.iMaxRulesPerNode > 0) iNumRules = Math.Min(lSortedRules.Count, lsett.iMaxRulesPerNode);
 
             aBestRules = new RuleWeighted[iNumRules];
-            for (int iRule = 0; iRule < iNumRules; iRule++) {
+            for (int iRule = 0; iRule < iNumRules; iRule++)
+            {
                 aBestRules[iRule] = lSortedRules[iRule];
             }
 
-            
+
             //set best rule
             lrBestRule = aBestRules[0].Rule;
 
-            
+
             //TODO must check if this hevristics is OK (to privilige parent rule)
             if (ltnParentNode != null)
-                for (int iRule = 0; iRule < lSortedRules.Count && lSortedRules[iRule].Weight==lSortedRules[0].Weight; iRule++) {
-                    if (lSortedRules[iRule].Rule == ltnParentNode.lrBestRule) {
+                for (int iRule = 0;
+                    iRule < lSortedRules.Count && lSortedRules[iRule].Weight == lSortedRules[0].Weight;
+                    iRule++)
+                {
+                    if (lSortedRules[iRule].Rule == ltnParentNode.lrBestRule)
+                    {
                         lrBestRule = lSortedRules[iRule].Rule;
                         break;
                     }
                 }
-             
         }
-        private void AddSubAll() {
+
+        private void AddSubAll()
+        {
             int iStartGroup = iStart;
             char chCharPrev = '\0';
             bool bSubGroupNeeded = false;
-            for (int iWrd = iStart; iWrd <= iEnd; iWrd++) {
+            for (int iWrd = iStart; iWrd <= iEnd; iWrd++)
+            {
                 string sWord = elExamples[iWrd].Word;
 
                 char chCharThis = sWord.Length > iSimilarity ? sWord[sWord.Length - 1 - iSimilarity] : '\0';
 
-                if (iWrd != iStart && chCharPrev != chCharThis) {
-                    if (bSubGroupNeeded) {
+                if (iWrd != iStart && chCharPrev != chCharThis)
+                {
+                    if (bSubGroupNeeded)
+                    {
                         AddSub(iStartGroup, iWrd - 1, chCharPrev);
                         bSubGroupNeeded = false;
                     }
@@ -230,9 +261,11 @@ namespace LemmaSharp {
             }
             if (bSubGroupNeeded && iStartGroup != iStart) AddSub(iStartGroup, iEnd, chCharPrev);
         }
-        private void AddSub(int iStart, int iEnd, char chChar) {
+
+        private void AddSub(int iStart, int iEnd, char chChar)
+        {
             LemmaTreeNode ltnSub = new LemmaTreeNode(lsett, elExamples, iStart, iEnd, this);
-            
+
             //TODO - maybe not realy appropriate because loosing statisitcs from multiple possible rules
             if (ltnSub.lrBestRule == lrBestRule && ltnSub.dictSubNodes == null) return;
 
@@ -241,9 +274,11 @@ namespace LemmaSharp {
         }
 
         #endregion
+
         #region Essential Class Functions (running model = lemmatizing)
 
-        public bool ConditionSatisfied(string sWord) {
+        public bool ConditionSatisfied(string sWord)
+        {
             //if (bWholeWord)
             //    return sWord == sCondition;
             //else 
@@ -259,13 +294,16 @@ namespace LemmaSharp {
 
             return true;
         }
-        public string Lemmatize(string sWord) {
-            if (sWord.Length >= iSimilarity && dictSubNodes != null) {
-                char chChar = sWord.Length > iSimilarity ? sWord[sWord.Length - 1 -iSimilarity] : '\0';
+
+        public string Lemmatize(string sWord)
+        {
+            if (sWord.Length >= iSimilarity && dictSubNodes != null)
+            {
+                char chChar = sWord.Length > iSimilarity ? sWord[sWord.Length - 1 - iSimilarity] : '\0';
                 if (dictSubNodes.ContainsKey(chChar) && dictSubNodes[chChar].ConditionSatisfied(sWord))
                     return dictSubNodes[chChar].Lemmatize(sWord);
             }
-            
+
             return lrBestRule.Lemmatize(sWord);
         }
 
@@ -273,17 +311,20 @@ namespace LemmaSharp {
 
         #region Output Functions (ToString)
 
-        public override string ToString() {
+        public override string ToString()
+        {
             StringBuilder sb = new StringBuilder();
             ToString(sb, 0);
             return sb.ToString();
         }
-        private void ToString(StringBuilder sb, int iLevel) {
+
+        private void ToString(StringBuilder sb, int iLevel)
+        {
             sb.Append(new string('\t', iLevel));
-            sb.Append("Suffix=\"" + (bWholeWord?"^":"") + sCondition + "\"; ");
+            sb.Append("Suffix=\"" + (bWholeWord ? "^" : "") + sCondition + "\"; ");
             sb.Append("Rule=\"" + lrBestRule.ToString() + "\"; ");
             sb.Append("Weight=" + dWeight + "\"; ");
-            if (aBestRules != null && aBestRules.Length>0) sb.Append("Cover=" + aBestRules[0].Weight + "; ");
+            if (aBestRules != null && aBestRules.Length > 0) sb.Append("Cover=" + aBestRules[0].Weight + "; ");
             sb.Append("Rulles=");
             if (aBestRules != null)
                 foreach (RuleWeighted rw in aBestRules)
@@ -301,11 +342,14 @@ namespace LemmaSharp {
 
         #region Serialization Functions (Binary)
 
-        public void Serialize(BinaryWriter binWrt) {
+        public void Serialize(BinaryWriter binWrt)
+        {
             binWrt.Write(dictSubNodes != null);
-            if (dictSubNodes != null) {
+            if (dictSubNodes != null)
+            {
                 binWrt.Write(dictSubNodes.Count);
-                foreach (KeyValuePair<char, LemmaTreeNode> kvp in dictSubNodes) {
+                foreach (KeyValuePair<char, LemmaTreeNode> kvp in dictSubNodes)
+                {
                     binWrt.Write(kvp.Key);
                     kvp.Value.Serialize(binWrt);
                 }
@@ -317,7 +361,8 @@ namespace LemmaSharp {
 
             binWrt.Write(lrBestRule.Signature);
             binWrt.Write(aBestRules.Length);
-            for (int i = 0; i < aBestRules.Length; i++) {
+            for (int i = 0; i < aBestRules.Length; i++)
+            {
                 binWrt.Write(aBestRules[i].Rule.Signature);
                 binWrt.Write(aBestRules[i].Weight);
             }
@@ -326,13 +371,18 @@ namespace LemmaSharp {
             binWrt.Write(iStart);
             binWrt.Write(iEnd);
         }
-        public void Deserialize(BinaryReader binRead, LemmatizerSettings lsett, ExampleList elExamples, LemmaTreeNode ltnParentNode) {
+
+        public void Deserialize(BinaryReader binRead, LemmatizerSettings lsett, ExampleList elExamples,
+            LemmaTreeNode ltnParentNode)
+        {
             this.lsett = lsett;
 
-            if (binRead.ReadBoolean()) {
+            if (binRead.ReadBoolean())
+            {
                 dictSubNodes = new Dictionary<char, LemmaTreeNode>();
                 int iCount = binRead.ReadInt32();
-                for (int i = 0; i < iCount; i++) {
+                for (int i = 0; i < iCount; i++)
+                {
                     char cKey = binRead.ReadChar();
                     LemmaTreeNode ltrSub = new LemmaTreeNode(binRead, this.lsett, elExamples, this);
                     dictSubNodes.Add(cKey, ltrSub);
@@ -360,13 +410,18 @@ namespace LemmaSharp {
             iEnd = binRead.ReadInt32();
             this.elExamples = elExamples;
         }
-        public LemmaTreeNode(BinaryReader binRead, LemmatizerSettings lsett, ExampleList elExamples, LemmaTreeNode ltnParentNode) {
+
+        public LemmaTreeNode(BinaryReader binRead, LemmatizerSettings lsett, ExampleList elExamples,
+            LemmaTreeNode ltnParentNode)
+        {
             Deserialize(binRead, lsett, elExamples, ltnParentNode);
         }
 
         #endregion
+
         #region Serialization Functions (Latino)
-        #if LATINO
+
+#if LATINO
 
         public void Save(Latino.BinarySerializer binWrt) {
             binWrt.WriteBool(dictSubNodes != null);
@@ -433,18 +488,20 @@ namespace LemmaSharp {
         }
 
         #endif
+
         #endregion
 
         #region Other (Temporarly)
 
         //TODO - this is temp function, remove it
-        public bool CheckConsistency() {
+        public bool CheckConsistency()
+        {
             bool bReturn = true;
             if (dictSubNodes != null)
                 foreach (LemmaTreeNode ltnChild in dictSubNodes.Values)
                     bReturn = bReturn &&
-                        ltnChild.CheckConsistency() &&
-                        ltnChild.sCondition.EndsWith(sCondition);
+                              ltnChild.CheckConsistency() &&
+                              ltnChild.sCondition.EndsWith(sCondition);
             return bReturn;
         }
 

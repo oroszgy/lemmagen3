@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Runtime.Serialization;
 
 
-namespace LemmaSharp {
-    public class LemmaExample : IComparable<LemmaExample>, IComparer<LemmaExample> {
+namespace LemmaSharp
+{
+    public class LemmaExample : IComparable<LemmaExample>, IComparer<LemmaExample>
+    {
         #region Private Variables
 
         private string sWord;
@@ -16,7 +16,7 @@ namespace LemmaSharp {
         private double dWeight;
         private LemmaRule lrRule;
         private LemmatizerSettings lsett;
-        
+
         private string sWordRearCache;
         private string sWordFrontCache;
         private string sLemmaFrontCache;
@@ -25,7 +25,9 @@ namespace LemmaSharp {
 
         #region Constructor(s) & Destructor(s)
 
-        public LemmaExample(string sWord, string sLemma, double dWeight, string sMsd, RuleList rlRules, LemmatizerSettings lsett) {
+        public LemmaExample(string sWord, string sLemma, double dWeight, string sMsd, RuleList rlRules,
+            LemmatizerSettings lsett)
+        {
             this.lsett = lsett;
 
             this.sWord = sWord;
@@ -34,7 +36,8 @@ namespace LemmaSharp {
             this.dWeight = dWeight;
             this.lrRule = rlRules.AddRule(this);
 
-            switch (lsett.eMsdConsider) {
+            switch (lsett.eMsdConsider)
+            {
                 case LemmatizerSettings.MsdConsideration.Ignore:
                 case LemmatizerSettings.MsdConsideration.JoinAll:
                 case LemmatizerSettings.MsdConsideration.JoinDistinct:
@@ -50,97 +53,107 @@ namespace LemmaSharp {
             this.sWordRearCache = null;
             this.sWordFrontCache = null;
             this.sLemmaFrontCache = null;
-
         }
 
         #endregion
 
         #region Public Properties
 
-        public string Word {
-            get {
-                return sWord;
-            }
+        public string Word
+        {
+            get { return sWord; }
         }
-        public string Lemma {
-            get {
-                return sLemma;
-            }
+
+        public string Lemma
+        {
+            get { return sLemma; }
         }
-        public string Msd {
-            get {
-                return sMsd;
-            }
+
+        public string Msd
+        {
+            get { return sMsd; }
         }
-        public string Signature {
-            get {
-                return sSignature;
-            }
+
+        public string Signature
+        {
+            get { return sSignature; }
         }
-        public double Weight {
-            get {
-                return dWeight;
-            }
+
+        public double Weight
+        {
+            get { return dWeight; }
         }
-        public LemmaRule Rule {
-            get {
-                return lrRule;
-            }
+
+        public LemmaRule Rule
+        {
+            get { return lrRule; }
         }
 
         /// <summary>
         /// Word to be pre-lemmatized with Front-Lemmatizer into LemmaFront which is then lemmatized by standard Rear-Lemmatizer (Warning it is reversed)
         /// </summary>
-        public string WordFront {
-            get {
+        public string WordFront
+        {
+            get
+            {
                 if (sWordFrontCache == null)
                     sWordFrontCache = StringReverse(sWord);
                 return sWordFrontCache;
             }
         }
+
         /// <summary>
         /// Lemma to be produced by pre-lemmatizing with Front-Lemmatizer (Warning it is reversed)
         /// </summary>
-        public string LemmaFront {
-            get {
+        public string LemmaFront
+        {
+            get
+            {
                 if (sLemmaFrontCache == null)
                     sLemmaFrontCache = StringReverse(WordRear);
                 return sLemmaFrontCache;
             }
         }
+
         /// <summary>
         /// word to be lemmatized by standard Rear-Lemmatizer (it's beggining has been already modified by Front-Lemmatizer)
         /// </summary>
-        public string WordRear {
-            get {
-                if (sWordRearCache == null) {
+        public string WordRear
+        {
+            get
+            {
+                if (sWordRearCache == null)
+                {
                     int lemmaPos = 0, wordPos = 0;
                     string common = LongestCommonSubstring(sWord, sLemma, ref wordPos, ref lemmaPos);
-                    sWordRearCache = lemmaPos == -1 ? sLemma : (sLemma.Substring(0, lemmaPos + common.Length) + sWord.Substring(wordPos + common.Length));
+                    sWordRearCache = lemmaPos == -1
+                        ? sLemma
+                        : (sLemma.Substring(0, lemmaPos + common.Length) + sWord.Substring(wordPos + common.Length));
                 }
                 return sWordRearCache;
             }
         }
+
         /// <summary>
         /// lemma to be produced by standard Rear-Lemmatizer from WordRear
         /// </summary>
-        public string LemmaRear {
-            get {
-                return sLemma;
-            }
+        public string LemmaRear
+        {
+            get { return sLemma; }
         }
-
 
         #endregion
 
         #region Essential Class Functions (joining two examples into one)
 
         //TODO - this function is not totaly ok because sMsd should not be changed since it could be included in signature
-        public void Join(LemmaExample leJoin) {
+        public void Join(LemmaExample leJoin)
+        {
             dWeight += leJoin.dWeight;
 
             if (sMsd != null)
-                switch (lsett.eMsdConsider) {
+                switch (lsett.eMsdConsider)
+                {
                     case LemmatizerSettings.MsdConsideration.Ignore:
                         sMsd = null;
                         break;
@@ -150,7 +163,7 @@ namespace LemmaSharp {
                         sMsd += "|" + leJoin.sMsd;
                         break;
                     case LemmatizerSettings.MsdConsideration.JoinDistinct:
-                        if (!new List<string>(sMsd.Split(new char[] { '|' })).Contains(leJoin.sMsd))
+                        if (!new List<string>(sMsd.Split(new char[] {'|'})).Contains(leJoin.sMsd))
                             sMsd += "|" + leJoin.sMsd;
                         break;
                     case LemmatizerSettings.MsdConsideration.JoinSameSubstring:
@@ -162,16 +175,19 @@ namespace LemmaSharp {
                     default:
                         break;
                 }
-
         }
 
         #endregion
+
         #region Essential Class Functions (calculating similarities betwen examples)
 
-        public int Similarity(LemmaExample le) {
+        public int Similarity(LemmaExample le)
+        {
             return Similarity(this, le);
         }
-        public static int Similarity(LemmaExample le1, LemmaExample le2) {
+
+        public static int Similarity(LemmaExample le1, LemmaExample le2)
+        {
             string sWord1 = le1.sWord;
             string sWord2 = le2.sWord;
             int iLen1 = sWord1.Length;
@@ -189,14 +205,17 @@ namespace LemmaSharp {
         }
 
         #endregion
+
         #region Essential Class Functions (comparing examples - eg.: for sorting)
+
         /// <summary>
         /// Function used to comprare current MultextExample (ME) against argument ME.
         /// Mainly used in for sorting lists of MEs.
         /// </summary>
         /// <param name="other"> MultextExample (ME) that we compare current ME against.</param>
         /// <returns>1 if current ME is bigger, -1 if smaler and 0 if both are the same.</returns>
-        public int CompareTo(LemmaExample other) {
+        public int CompareTo(LemmaExample other)
+        {
             int iComparison;
 
             iComparison = CompareStrings(this.sWord, other.sWord, false);
@@ -206,28 +225,35 @@ namespace LemmaSharp {
             if (iComparison != 0) return iComparison;
 
             if (lsett.eMsdConsider == LemmatizerSettings.MsdConsideration.Distinct &&
-                this.sMsd != null && other.sMsd != null) {
+                this.sMsd != null && other.sMsd != null)
+            {
                 iComparison = CompareStrings(this.sMsd, other.sMsd, true);
                 if (iComparison != 0) return iComparison;
             }
 
             return 0;
         }
-        public int Compare(LemmaExample x, LemmaExample y) {
+
+        public int Compare(LemmaExample x, LemmaExample y)
+        {
             return x.CompareTo(y);
         }
-        public static int CompareStrings(string sStr1, string sStr2, bool bForward) {
+
+        public static int CompareStrings(string sStr1, string sStr2, bool bForward)
+        {
             int iLen1 = sStr1.Length;
             int iLen2 = sStr2.Length;
             int iMaxLen = Math.Min(iLen1, iLen2);
 
             if (bForward)
-                for (int iPos = 0; iPos < iMaxLen; iPos++) {
+                for (int iPos = 0; iPos < iMaxLen; iPos++)
+                {
                     if (sStr1[iPos] > sStr2[iPos]) return 1;
                     if (sStr1[iPos] < sStr2[iPos]) return -1;
                 }
             else
-                for (int iPos = 1; iPos <= iMaxLen; iPos++) {
+                for (int iPos = 1; iPos <= iMaxLen; iPos++)
+                {
                     if (sStr1[iLen1 - iPos] > sStr2[iLen2 - iPos]) return 1;
                     if (sStr1[iLen1 - iPos] < sStr2[iLen2 - iPos]) return -1;
                 }
@@ -236,7 +262,9 @@ namespace LemmaSharp {
             if (iLen1 < iLen2) return -1;
             return 0;
         }
-        public static int EqualPrifixLen(string sStr1, string sStr2) {
+
+        public static int EqualPrifixLen(string sStr1, string sStr2)
+        {
             int iLen1 = sStr1.Length;
             int iLen2 = sStr2.Length;
             int iMaxLen = Math.Min(iLen1, iLen2);
@@ -247,7 +275,8 @@ namespace LemmaSharp {
             return iMaxLen;
         }
 
-        public static string LongestCommonSubstring(string sStr1, string sStr2, ref int iPosInStr1, ref int iPosInStr2) {
+        public static string LongestCommonSubstring(string sStr1, string sStr2, ref int iPosInStr1, ref int iPosInStr2)
+        {
             int[,] l = new int[sStr1.Length + 1, sStr2.Length + 1];
             int z = 0;
             string ret = "";
@@ -255,43 +284,45 @@ namespace LemmaSharp {
             iPosInStr2 = -1;
 
             for (int i = 0; i < sStr1.Length; i++)
-                for (int j = 0; j < sStr2.Length; j++)
-                    if (sStr1[i] == sStr2[j]) {
-                        if (i == 0 || j == 0) l[i, j] = 1;
-                        else l[i, j] = l[i - 1, j - 1] + 1;
-                        if (l[i, j] > z) {
-                            z = l[i, j];
-                            iPosInStr1 = i - z + 1;
-                            iPosInStr2 = j - z + 1;
-                            ret = sStr1.Substring(i - z + 1, z);
-                        }
+            for (int j = 0; j < sStr2.Length; j++)
+                if (sStr1[i] == sStr2[j])
+                {
+                    if (i == 0 || j == 0) l[i, j] = 1;
+                    else l[i, j] = l[i - 1, j - 1] + 1;
+                    if (l[i, j] > z)
+                    {
+                        z = l[i, j];
+                        iPosInStr1 = i - z + 1;
+                        iPosInStr2 = j - z + 1;
+                        ret = sStr1.Substring(i - z + 1, z);
                     }
+                }
 
             return ret;
         }
-        public static string StringReverse(string s) {
+
+        public static string StringReverse(string s)
+        {
             if (s == null) return null;
             char[] charArray = s.ToCharArray();
             int len = s.Length - 1;
 
-            for (int i = 0; i < len; i++, len--) {
+            for (int i = 0; i < len; i++, len--)
+            {
                 charArray[i] ^= charArray[len];
                 charArray[len] ^= charArray[i];
                 charArray[i] ^= charArray[len];
             }
 
             return new string(charArray);
-        } 
-
-        
-
-
+        }
 
         #endregion
 
         #region Output Functions (ToString)
 
-        public override string ToString() {
+        public override string ToString()
+        {
             string sThis =
                 (sWord == null ? "" : "W:\"" + sWord + "\" ") +
                 (sLemma == null ? "" : "L:\"" + sLemma + "\" ") +
@@ -306,33 +337,37 @@ namespace LemmaSharp {
 
         #region Serialization Functions (Binary)
 
-        public void Serialize(BinaryWriter binWrt, bool bThisTopObject) {
+        public void Serialize(BinaryWriter binWrt, bool bThisTopObject)
+        {
             //save metadata
             binWrt.Write(bThisTopObject);
-            
+
             //save value types --------------------------------------
             binWrt.Write(sWord);
             binWrt.Write(sLemma);
             binWrt.Write(sSignature);
-            if (sMsd == null) 
+            if (sMsd == null)
                 binWrt.Write(false);
-            else {
+            else
+            {
                 binWrt.Write(true);
                 binWrt.Write(sMsd);
             }
             binWrt.Write(dWeight);
 
             //save refernce types if needed -------------------------
-            if (bThisTopObject) {
+            if (bThisTopObject)
+            {
                 lsett.Serialize(binWrt);
                 lrRule.Serialize(binWrt, false);
             }
-
         }
-        public void Deserialize(BinaryReader binRead, LemmatizerSettings lsett, LemmaRule lrRule) {
+
+        public void Deserialize(BinaryReader binRead, LemmatizerSettings lsett, LemmaRule lrRule)
+        {
             //load metadata
-            bool bThisTopObject = binRead.ReadBoolean();            
-            
+            bool bThisTopObject = binRead.ReadBoolean();
+
             //load value types --------------------------------------
             sWord = binRead.ReadString();
             sLemma = binRead.ReadString();
@@ -344,11 +379,13 @@ namespace LemmaSharp {
             dWeight = binRead.ReadDouble();
 
             //load refernce types if needed -------------------------
-            if (bThisTopObject) {
+            if (bThisTopObject)
+            {
                 this.lsett = new LemmatizerSettings(binRead);
                 this.lrRule = new LemmaRule(binRead, this.lsett);
             }
-            else {
+            else
+            {
                 this.lsett = lsett;
                 this.lrRule = lrRule;
             }
@@ -357,13 +394,17 @@ namespace LemmaSharp {
             this.sWordFrontCache = null;
             this.sLemmaFrontCache = null;
         }
-        public LemmaExample(BinaryReader binRead, LemmatizerSettings lsett, LemmaRule lrRule) {
+
+        public LemmaExample(BinaryReader binRead, LemmatizerSettings lsett, LemmaRule lrRule)
+        {
             Deserialize(binRead, lsett, lrRule);
         }
 
         #endregion
+
         #region Serialization Functions (Latino)
-        #if LATINO
+
+#if LATINO
 
         public void Save(Latino.BinarySerializer binWrt, bool bThisTopObject) {
             //save metadata
@@ -417,8 +458,7 @@ namespace LemmaSharp {
         }
 
         #endif
+
         #endregion
     }
 }
-
-

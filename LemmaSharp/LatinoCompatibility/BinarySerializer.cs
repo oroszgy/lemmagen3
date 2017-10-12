@@ -18,12 +18,7 @@
 //  following Latino namspace will not be added to the project.
 
 
-using System;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
-using System.IO;
+
 
 #if LATINO
 
@@ -89,14 +84,16 @@ namespace Latino
         }
         public BinarySerializer(string file_name, FileMode file_mode)
         {
-            m_stream = new FileStream(file_name, file_mode); // throws ArgumentException, NotSupportedException, ArgumentNullException, SecurityException, FileNotFoundException, IOException, DirectoryNotFoundException, PathTooLongException, ArgumentOutOfRangeException
+            m_stream =
+new FileStream(file_name, file_mode); // throws ArgumentException, NotSupportedException, ArgumentNullException, SecurityException, FileNotFoundException, IOException, DirectoryNotFoundException, PathTooLongException, ArgumentOutOfRangeException
         }
         // *** Reading ***
         private byte[] Read<T>() // Read<T>() is directly or indirectly called from several methods thus exceptions thrown here can also be thrown in all those methods
         {
             int sz = Marshal.SizeOf(typeof(T));
             byte[] buffer = new byte[sz];
-            int num_bytes = m_stream.Read(buffer, 0, sz); // throws IOException, NotSupportedException, ObjectDisposedException
+            int num_bytes =
+m_stream.Read(buffer, 0, sz); // throws IOException, NotSupportedException, ObjectDisposedException
             //Utils.ThrowException(num_bytes < sz ? new EndOfStreamException() : null);
             return buffer;
         }

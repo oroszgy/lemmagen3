@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace LemmaSharp {
+namespace LemmaSharp
+{
     [Serializable()]
-    class RuleWeighted: IComparable<RuleWeighted>{
+    class RuleWeighted : IComparable<RuleWeighted>
+    {
         #region Private Variables
 
         private LemmaRule lrRule;
@@ -14,7 +14,8 @@ namespace LemmaSharp {
 
         #region Constructor(s) & Destructor(s)
 
-        public RuleWeighted(LemmaRule lrRule, double dWeight) {
+        public RuleWeighted(LemmaRule lrRule, double dWeight)
+        {
             this.lrRule = lrRule;
             this.dWeight = dWeight;
         }
@@ -23,10 +24,13 @@ namespace LemmaSharp {
 
         #region Public Properties
 
-        public LemmaRule Rule {
+        public LemmaRule Rule
+        {
             get { return lrRule; }
         }
-        public double Weight {
+
+        public double Weight
+        {
             get { return dWeight; }
         }
 
@@ -34,7 +38,8 @@ namespace LemmaSharp {
 
         #region Essential Class Functions (comparing objects, eg.: for sorting)
 
-        public int CompareTo(RuleWeighted rl) {
+        public int CompareTo(RuleWeighted rl)
+        {
             if (this.dWeight < rl.dWeight) return 1;
             if (this.dWeight > rl.dWeight) return -1;
             if (this.lrRule.Id < rl.lrRule.Id) return 1;
@@ -46,7 +51,8 @@ namespace LemmaSharp {
 
         #region Output & Serialization Functions
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return lrRule.ToString() + dWeight.ToString("(0.00%)");
         }
 

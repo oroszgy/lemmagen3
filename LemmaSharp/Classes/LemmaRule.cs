@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Runtime.Serialization;
 
-namespace LemmaSharp {
-    public class LemmaRule {
+namespace LemmaSharp
+{
+    public class LemmaRule
+    {
         #region Private Variables
 
         private int iId;
@@ -19,7 +18,8 @@ namespace LemmaSharp {
 
         #region Constructor(s) & Destructor(s)
 
-        public LemmaRule(string sWord, string sLemma, int iId, LemmatizerSettings lsett) {
+        public LemmaRule(string sWord, string sLemma, int iId, LemmatizerSettings lsett)
+        {
             this.lsett = lsett;
             this.iId = iId;
 
@@ -27,11 +27,13 @@ namespace LemmaSharp {
             sTo = sLemma.Substring(iSameStem);
             iFrom = sWord.Length - iSameStem;
 
-            if (lsett.bUseFromInRules) {
+            if (lsett.bUseFromInRules)
+            {
                 sFrom = sWord.Substring(iSameStem);
                 sSignature = "[" + sFrom + "]==>[" + sTo + "]";
             }
-            else {
+            else
+            {
                 sFrom = null;
                 sSignature = "[#" + iFrom + "]==>[" + sTo + "]";
             }
@@ -41,22 +43,22 @@ namespace LemmaSharp {
 
         #region Public Properties
 
-        public string Signature {
-            get {
-                return sSignature;
-            }
+        public string Signature
+        {
+            get { return sSignature; }
         }
-        public int Id {
-            get {
-                return iId;
-            }
+
+        public int Id
+        {
+            get { return iId; }
         }
 
         #endregion
 
         #region Essential Class Functions
 
-        private static int SameStem(string sStr1, string sStr2) {
+        private static int SameStem(string sStr1, string sStr2)
+        {
             int iLen1 = sStr1.Length;
             int iLen2 = sStr2.Length;
             int iMaxLen = Math.Min(iLen1, iLen2);
@@ -66,10 +68,14 @@ namespace LemmaSharp {
 
             return iMaxLen;
         }
-        public bool IsApplicableToGroup(int iGroupCondLen) {
-            return iGroupCondLen >= iFrom; 
+
+        public bool IsApplicableToGroup(int iGroupCondLen)
+        {
+            return iGroupCondLen >= iFrom;
         }
-        public string Lemmatize(string sWord) {
+
+        public string Lemmatize(string sWord)
+        {
             return sWord.Substring(0, sWord.Length - iFrom) + sTo;
         }
 
@@ -77,7 +83,8 @@ namespace LemmaSharp {
 
         #region Output Functions (ToString)
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return iId + ":" + sSignature;
         }
 
@@ -85,16 +92,18 @@ namespace LemmaSharp {
 
         #region Serialization Functions (Binary)
 
-        public void Serialize(BinaryWriter binWrt, bool bThisTopObject) {
+        public void Serialize(BinaryWriter binWrt, bool bThisTopObject)
+        {
             //save metadata
-            binWrt.Write(bThisTopObject);            
-            
+            binWrt.Write(bThisTopObject);
+
             //save value types --------------------------------------
             binWrt.Write(iId);
             binWrt.Write(iFrom);
-            if (sFrom == null) 
+            if (sFrom == null)
                 binWrt.Write(false);
-            else {
+            else
+            {
                 binWrt.Write(true);
                 binWrt.Write(sFrom);
             }
@@ -104,10 +113,12 @@ namespace LemmaSharp {
             if (bThisTopObject)
                 lsett.Serialize(binWrt);
         }
-        public void Deserialize(BinaryReader binRead, LemmatizerSettings lsett) {
+
+        public void Deserialize(BinaryReader binRead, LemmatizerSettings lsett)
+        {
             //load metadata
-            bool bThisTopObject = binRead.ReadBoolean();    
-            
+            bool bThisTopObject = binRead.ReadBoolean();
+
             //load value types --------------------------------------
             iId = binRead.ReadInt32();
             iFrom = binRead.ReadInt32();
@@ -124,13 +135,17 @@ namespace LemmaSharp {
             else
                 this.lsett = lsett;
         }
-        public LemmaRule(System.IO.BinaryReader binRead, LemmatizerSettings lsett) {
+
+        public LemmaRule(System.IO.BinaryReader binRead, LemmatizerSettings lsett)
+        {
             this.Deserialize(binRead, lsett);
         }
 
         #endregion
+
         #region Serialization Functions (Latino)
-        #if LATINO
+
+#if LATINO
 
         public void Save(Latino.BinarySerializer binWrt, bool bThisTopObject) {
             //save metadata
@@ -176,6 +191,7 @@ namespace LemmaSharp {
         }
 
         #endif
+
         #endregion
     }
 }
