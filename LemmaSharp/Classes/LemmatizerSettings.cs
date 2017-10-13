@@ -84,10 +84,10 @@ namespace LemmaSharp
         {
             return new LemmatizerSettings()
             {
-                bUseFromInRules = this.bUseFromInRules,
-                eMsdConsider = this.eMsdConsider,
-                iMaxRulesPerNode = this.iMaxRulesPerNode,
-                bBuildFrontLemmatizer = this.bBuildFrontLemmatizer
+                bUseFromInRules = bUseFromInRules,
+                eMsdConsider = eMsdConsider,
+                iMaxRulesPerNode = iMaxRulesPerNode,
+                bBuildFrontLemmatizer = bBuildFrontLemmatizer
             };
         }
 
@@ -131,9 +131,9 @@ namespace LemmaSharp
             bBuildFrontLemmatizer = binRead.ReadBoolean();
         }
 
-        public LemmatizerSettings(System.IO.BinaryReader binRead)
+        public LemmatizerSettings(BinaryReader binRead)
         {
-            this.Deserialize(binRead);
+            Deserialize(binRead);
         }
 
         #endregion

@@ -24,9 +24,9 @@ namespace LemmaSharp
         {
             this.lsett = lsett;
 
-            this.dictExamples = new Dictionary<string, LemmaExample>();
-            this.lstExamples = null;
-            this.rlRules = new RuleList(lsett);
+            dictExamples = new Dictionary<string, LemmaExample>();
+            lstExamples = null;
+            rlRules = new RuleList(lsett);
         }
 
         public ExampleList(StreamReader srIn, string sFormat, LemmatizerSettings lsett) : this(lsett)
@@ -179,7 +179,7 @@ namespace LemmaSharp
         {
             ExampleList elExamplesNew = new ExampleList(lsett);
 
-            foreach (LemmaExample le in this.ListExamples)
+            foreach (LemmaExample le in ListExamples)
             {
                 if (front)
                     elExamplesNew.AddExample(le.WordFront, le.LemmaFront, le.Weight, le.Msd);
@@ -240,9 +240,9 @@ namespace LemmaSharp
         {
             lsett = (LemmatizerSettings) info.GetValue("lsett", typeof(LemmatizerSettings));
 
-            this.dictExamples = new Dictionary<string, LemmaExample>();
-            this.lstExamples = null;
-            this.rlRules = new RuleList(lsett);
+            dictExamples = new Dictionary<string, LemmaExample>();
+            lstExamples = null;
+            rlRules = new RuleList(lsett);
 
             string[] aWords = (string[]) info.GetValue("aWords", typeof(string[]));
             string[] aLemmas = (string[]) info.GetValue("aLemmas", typeof(string[]));

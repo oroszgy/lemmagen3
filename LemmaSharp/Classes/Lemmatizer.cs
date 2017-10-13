@@ -30,9 +30,9 @@ namespace LemmaSharp
         public Lemmatizer(LemmatizerSettings lsett)
         {
             this.lsett = lsett;
-            this.elExamples = new ExampleList(lsett);
-            this.ltnRootNode = null;
-            this.ltnRootNodeFront = null;
+            elExamples = new ExampleList(lsett);
+            ltnRootNode = null;
+            ltnRootNodeFront = null;
         }
 
         public Lemmatizer(StreamReader srIn, string sFormat, LemmatizerSettings lsett) : this(lsett)
@@ -102,7 +102,7 @@ namespace LemmaSharp
 
         public void AddMultextFile(StreamReader srIn, string sFormat)
         {
-            this.elExamples.AddMultextFile(srIn, sFormat);
+            elExamples.AddMultextFile(srIn, sFormat);
             ltnRootNode = null;
         }
 
@@ -180,7 +180,7 @@ namespace LemmaSharp
         {
             lsett = (LemmatizerSettings) info.GetValue("lsett", typeof(LemmatizerSettings));
             elExamples = (ExampleList) info.GetValue("elExamples", typeof(ExampleList));
-            this.BuildModel();
+            BuildModel();
         }
 
         #endregion
@@ -207,7 +207,7 @@ namespace LemmaSharp
 
         public void SerializeModel(StreamWriter sb, int iLevel, bool first)
         {
-            SerializeModel(this.RootNode, sb, iLevel, first);
+            SerializeModel(RootNode, sb, iLevel, first);
         }
 
         private void SerializeModel(LemmaTreeNode ltn, StreamWriter sb, int iLevel, bool first)
@@ -321,14 +321,14 @@ namespace LemmaSharp
         private void SerializeNone(Stream streamOut, bool bSerializeExamples)
         {
             BinaryWriter binWrt = new BinaryWriter(streamOut);
-            this.Serialize(binWrt, bSerializeExamples);
+            Serialize(binWrt, bSerializeExamples);
         }
 
         private void SerializeDeflate(Stream streamOut, bool bSerializeExamples)
         {
             Stream streamOutNew = new DeflateStream(streamOut, CompressionMode.Compress, true);
             BinaryWriter binWrt = new BinaryWriter(streamOutNew);
-            this.Serialize(binWrt, bSerializeExamples);
+            Serialize(binWrt, bSerializeExamples);
             binWrt.Flush();
             binWrt.Close();
         }
@@ -372,7 +372,7 @@ namespace LemmaSharp
 
             MemoryStream msTemp = new MemoryStream();
             BinaryWriter binWrtTemp = new BinaryWriter(msTemp);
-            this.Serialize(binWrtTemp, bSerializeExamples);
+            Serialize(binWrtTemp, bSerializeExamples);
             msTemp.Position = 0;
 
             SevenZip.Compression.LZMA.Encoder encoder = new SevenZip.Compression.LZMA.Encoder();

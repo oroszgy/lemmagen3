@@ -40,10 +40,10 @@ namespace LemmaSharp
 
         public int CompareTo(RuleWeighted rl)
         {
-            if (this.dWeight < rl.dWeight) return 1;
-            if (this.dWeight > rl.dWeight) return -1;
-            if (this.lrRule.Id < rl.lrRule.Id) return 1;
-            if (this.lrRule.Id > rl.lrRule.Id) return -1;
+            if (dWeight < rl.dWeight) return 1;
+            if (dWeight > rl.dWeight) return -1;
+            if (lrRule.Id < rl.lrRule.Id) return 1;
+            if (lrRule.Id > rl.lrRule.Id) return -1;
             return 0;
         }
 

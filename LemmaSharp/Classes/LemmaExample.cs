@@ -34,7 +34,7 @@ namespace LemmaSharp
             this.sLemma = sLemma;
             this.sMsd = sMsd;
             this.dWeight = dWeight;
-            this.lrRule = rlRules.AddRule(this);
+            lrRule = rlRules.AddRule(this);
 
             switch (lsett.eMsdConsider)
             {
@@ -50,9 +50,9 @@ namespace LemmaSharp
                     break;
             }
 
-            this.sWordRearCache = null;
-            this.sWordFrontCache = null;
-            this.sLemmaFrontCache = null;
+            sWordRearCache = null;
+            sWordFrontCache = null;
+            sLemmaFrontCache = null;
         }
 
         #endregion
@@ -218,16 +218,16 @@ namespace LemmaSharp
         {
             int iComparison;
 
-            iComparison = CompareStrings(this.sWord, other.sWord, false);
+            iComparison = CompareStrings(sWord, other.sWord, false);
             if (iComparison != 0) return iComparison;
 
-            iComparison = CompareStrings(this.sLemma, other.sLemma, true);
+            iComparison = CompareStrings(sLemma, other.sLemma, true);
             if (iComparison != 0) return iComparison;
 
             if (lsett.eMsdConsider == LemmatizerSettings.MsdConsideration.Distinct &&
-                this.sMsd != null && other.sMsd != null)
+                sMsd != null && other.sMsd != null)
             {
-                iComparison = CompareStrings(this.sMsd, other.sMsd, true);
+                iComparison = CompareStrings(sMsd, other.sMsd, true);
                 if (iComparison != 0) return iComparison;
             }
 
@@ -390,9 +390,9 @@ namespace LemmaSharp
                 this.lrRule = lrRule;
             }
 
-            this.sWordRearCache = null;
-            this.sWordFrontCache = null;
-            this.sLemmaFrontCache = null;
+            sWordRearCache = null;
+            sWordFrontCache = null;
+            sLemmaFrontCache = null;
         }
 
         public LemmaExample(BinaryReader binRead, LemmatizerSettings lsett, LemmaRule lrRule)

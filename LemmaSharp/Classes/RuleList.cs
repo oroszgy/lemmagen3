@@ -35,17 +35,17 @@ namespace LemmaSharp
 
         public LemmaRule AddRule(LemmaExample le)
         {
-            return AddRule(new LemmaRule(le.Word, le.Lemma, this.Count, lsett));
+            return AddRule(new LemmaRule(le.Word, le.Lemma, Count, lsett));
         }
 
         private LemmaRule AddRule(LemmaRule lrRuleNew)
         {
             LemmaRule lrRuleReturn = null;
 
-            if (!this.TryGetValue(lrRuleNew.Signature, out lrRuleReturn))
+            if (!TryGetValue(lrRuleNew.Signature, out lrRuleReturn))
             {
                 lrRuleReturn = lrRuleNew;
-                this.Add(lrRuleReturn.Signature, lrRuleReturn);
+                Add(lrRuleReturn.Signature, lrRuleReturn);
             }
 
             return lrRuleReturn;
@@ -67,7 +67,7 @@ namespace LemmaSharp
                 lsett.Serialize(binWrt);
 
             //save list items ---------------------------------------
-            int iCount = this.Count;
+            int iCount = Count;
             binWrt.Write(iCount);
             foreach (KeyValuePair<string, LemmaRule> kvp in this)
             {
@@ -93,22 +93,22 @@ namespace LemmaSharp
                 this.lsett = lsett;
 
             //load list items ---------------------------------------
-            this.Clear();
+            Clear();
             int iCount = binRead.ReadInt32();
             for (int iId = 0; iId < iCount; iId++)
             {
                 string sKey = binRead.ReadString();
                 LemmaRule lrVal = new LemmaRule(binRead, this.lsett);
-                this.Add(sKey, lrVal);
+                Add(sKey, lrVal);
             }
 
             //link the default rule just Id was saved.
             lrDefaultRule = this[binRead.ReadString()];
         }
 
-        public RuleList(System.IO.BinaryReader binRead, LemmatizerSettings lsett)
+        public RuleList(BinaryReader binRead, LemmatizerSettings lsett)
         {
-            this.Deserialize(binRead, lsett);
+            Deserialize(binRead, lsett);
         }
 
         #endregion

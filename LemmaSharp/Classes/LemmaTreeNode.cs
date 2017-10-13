@@ -62,7 +62,7 @@ namespace LemmaSharp
             LemmaTreeNode ltnParentNode) : this(lsett)
         {
             this.ltnParentNode = ltnParentNode;
-            this.dictSubNodes = null;
+            dictSubNodes = null;
 
             this.iStart = iStart;
             this.iEnd = iEnd;
@@ -80,9 +80,9 @@ namespace LemmaSharp
 
             int iConditionLength = Math.Min(ltnParentNode == null ? 0 : ltnParentNode.iSimilarity + 1,
                 elExamples[iStart].Word.Length);
-            this.sCondition = elExamples[iStart].Word.Substring(elExamples[iStart].Word.Length - iConditionLength);
-            this.iSimilarity = elExamples[iStart].Similarity(elExamples[iEnd]);
-            this.bWholeWord = ltnParentNode == null ? false : elExamples[iEnd].Word.Length == ltnParentNode.iSimilarity;
+            sCondition = elExamples[iStart].Word.Substring(elExamples[iStart].Word.Length - iConditionLength);
+            iSimilarity = elExamples[iStart].Similarity(elExamples[iEnd]);
+            bWholeWord = ltnParentNode == null ? false : elExamples[iEnd].Word.Length == ltnParentNode.iSimilarity;
 
             FindBestRules();
             AddSubAll();
@@ -188,8 +188,8 @@ namespace LemmaSharp
                 //if none found then increase condition length or add some default appliable rule
                 if (dictApplicableRules.Count == 0)
                 {
-                    if (this.sCondition.Length < iSimilarity)
-                        this.sCondition = elExamples[iStart].Word
+                    if (sCondition.Length < iSimilarity)
+                        sCondition = elExamples[iStart].Word
                             .Substring(elExamples[iStart].Word.Length - (sCondition.Length + 1));
                     else
                         //TODO preveri hevristiko, mogoce je bolje ce se doda default rule namesto rulea od starsa

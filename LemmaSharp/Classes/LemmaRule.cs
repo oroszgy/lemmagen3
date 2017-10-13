@@ -136,9 +136,9 @@ namespace LemmaSharp
                 this.lsett = lsett;
         }
 
-        public LemmaRule(System.IO.BinaryReader binRead, LemmatizerSettings lsett)
+        public LemmaRule(BinaryReader binRead, LemmatizerSettings lsett)
         {
-            this.Deserialize(binRead, lsett);
+            Deserialize(binRead, lsett);
         }
 
         #endregion

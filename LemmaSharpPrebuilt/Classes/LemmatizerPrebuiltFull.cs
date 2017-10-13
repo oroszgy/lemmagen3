@@ -15,7 +15,7 @@ namespace LemmaSharp
             : base(lang)
         {
             Stream stream = GetResourceStream(GetResourceFileName(FILEMASK));
-            this.Deserialize(stream);
+            Deserialize(stream);
             stream.Close();
         }
 
