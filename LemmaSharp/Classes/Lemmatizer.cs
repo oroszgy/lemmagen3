@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.IO.Compression;
+using Newtonsoft.Json;
 using SevenZip;
 
 namespace LemmaSharp
@@ -207,33 +209,54 @@ namespace LemmaSharp
 
         public void SerializeModel(StreamWriter sb, int iLevel, bool first)
         {
-            SerializeModel(RootNode, sb, iLevel, first);
+            var model = SerializeModel(RootNode, sb, iLevel);
+            string outstr = JsonConvert.SerializeObject(model, Formatting.Indented);
+            sb.Write(outstr);
         }
 
-        private void SerializeModel(LemmaTreeNode ltn, StreamWriter sb, int iLevel, bool first)
+        private SerializationModel SerializeModel(LemmaTreeNode ltn, StreamWriter sb, int iLevel)
         {
-            sb.Write(new string('\t', first ? 1 : iLevel));
-            sb.Write("RULE: ");
-            sb.Write("i\"" + (ltn.bWholeWord ? "#" : "") + ltn.sCondition + "\" ");
-            sb.Write("t\"" + ltn.sCondition.Substring(ltn.sCondition.Length - ltn.lrBestRule.iFrom) + "\"->\"" +
-                     ltn.lrBestRule.sTo + "\";");
-            sb.WriteLine();
+            SerializationModel model = new SerializationModel();
+            model.matchWholeWord = ltn.bWholeWord;
+            model.suffixCondition = ltn.sCondition;
+            model.ruleFrom = ltn.sCondition.Substring(ltn.sCondition.Length - ltn.lrBestRule.iFrom);
+            model.ruleTo = ltn.lrBestRule.sTo;
+            model.childNodes = new List<SerializationModel>();
             if (ltn.dictSubNodes != null)
             {
-                sb.Write(new string('\t', iLevel));
-                sb.Write("{:");
-                bool firstInner = true;
                 foreach (LemmaTreeNode ltnChild in ltn.dictSubNodes.Values)
                 {
-                    SerializeModel(ltnChild, sb, iLevel + 1, firstInner);
-                    firstInner = false;
+                    SerializationModel node = SerializeModel(ltnChild, sb, iLevel + 1);
+                    model.childNodes.Add(node);
                 }
-                sb.Write(new string('\t', iLevel));
-                sb.Write(":}");
-                sb.WriteLine();
-                sb.WriteLine();
             }
+            return model;
         }
+
+//        private void SerializeModel(LemmaTreeNode ltn, StreamWriter sb, int iLevel, bool first)
+//        {
+//            sb.Write(new string('\t', first ? 1 : iLevel));
+//            sb.Write("RULE: ");
+//            sb.Write("i\"" + (ltn.bWholeWord ? "#" : "") + ltn.sCondition + "\" ");
+//            sb.Write("t\"" + ltn.sCondition.Substring(ltn.sCondition.Length - ltn.lrBestRule.iFrom) + "\"->\"" +
+//                     ltn.lrBestRule.sTo + "\";");
+//            sb.WriteLine();
+//            if (ltn.dictSubNodes != null)
+//            {
+//                sb.Write(new string('\t', iLevel));
+//                sb.Write("{:");
+//                bool firstInner = true;
+//                foreach (LemmaTreeNode ltnChild in ltn.dictSubNodes.Values)
+//                {
+//                    SerializeModel(ltnChild, sb, iLevel + 1, firstInner);
+//                    firstInner = false;
+//                }
+//                sb.Write(new string('\t', iLevel));
+//                sb.Write(":}");
+//                sb.WriteLine();
+//                sb.WriteLine();
+//            }
+//        }
 
         public void Deserialize(BinaryReader binRead)
         {

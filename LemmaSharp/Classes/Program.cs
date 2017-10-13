@@ -20,6 +20,7 @@ namespace LemmaSharp
             lemmatizer.BuildModel();
             lemmatizer.SerializeModel(sw, 0, false);
             Console.Out.WriteLine("Training is finished.");
+            Console.Out.WriteLine(lemmatizer.Lemmatize("unattendadly"));
         }
     }
 }
